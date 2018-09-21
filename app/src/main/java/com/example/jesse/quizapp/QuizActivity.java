@@ -51,13 +51,14 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkAnswer(true);
 
+                mTrueButton.setEnabled(false); mFalseButton.setEnabled(false);
+                mTrueButton.setClickable(false); mFalseButton.setClickable(false);
             }
         });
 
@@ -66,6 +67,9 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 checkAnswer(false);
+
+                mFalseButton.setEnabled(false); mTrueButton.setEnabled(false);
+                mFalseButton.setClickable(false); mTrueButton.setClickable(false);
             }
         });
 
@@ -74,8 +78,9 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){
                 if (mCurrentIndex == 0){
-                    mCurrentIndex = mQuestionBank.length-1;
-                    updateQuestion();
+                    // Goes back to the last value of the array. Disabled.
+                    //mCurrentIndex = mQuestionBank.length-1;
+                    //updateQuestion();
                 }
                 else {
                     mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
@@ -129,21 +134,38 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void updateQuestion() {
+        // Disables PrevButton if its the first question in the array.
+        if (mCurrentIndex == 0) {
+            mPrevButton.setVisibility(View.GONE);
+        }
+        else {mPrevButton.setVisibility(View.VISIBLE);}
+
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+        mTrueButton.setEnabled(true); mTrueButton.setClickable(true);
+        mFalseButton.setEnabled(true); mFalseButton.setClickable(true);
     }
 
     private void checkAnswer(boolean userPressedTrue){
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
+        double correct = 0;
+        double total = mQuestionBank.length-1;
 
         if (userPressedTrue == answerIsTrue){
             messageResId = R.string.correct_toast;
+            correct += 1.0;
         }
         else{
             messageResId = R.string.incorrect_toast;
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+
+        if (mCurrentIndex == mQuestionBank.length-1){
+            double avg = correct / total;
+            Toast.makeText(this, String.format("Your Average is %.2f", avg) , Toast.LENGTH_SHORT).show();
+        }
+
     }
 }
